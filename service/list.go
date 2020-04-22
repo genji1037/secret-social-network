@@ -31,19 +31,20 @@ query All($name: string){
 	}
 }
 	`
-	ratio := float64(5) / float64(6)
-	valueBal = valueBal * ratio
+	valueBal = valueBal * valueRatio
 	depth := 0
 	depthValueMapper := make(map[int]float64)
 	for valueBal > 10 {
 		depth++
 		q = embedLink(depth, q, valueBal)
 		depthValueMapper[depth] = valueBal
-		valueBal = valueBal * ratio
+		valueBal = valueBal * valueRatio
 	}
 	// remove last 2 unused variable
 	q = strings.ReplaceAll(q, fmt.Sprintf("u%d as ", depth), "")
-	q = strings.ReplaceAll(q, fmt.Sprintf("u%d as ", depth-1), "")
+	if depth > 1 {
+		q = strings.ReplaceAll(q, fmt.Sprintf("u%d as ", depth-1), "")
+	}
 
 	q = fmt.Sprintf(q, "")
 
