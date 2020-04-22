@@ -1,0 +1,5 @@
+# single thread
+[propagate] 4096 relations 611584 assignment cost 34.136419845s
+
+# 4 thread
+[propagate] 4096 relations 623096 assignment cost 15.298379965s
