@@ -17,9 +17,9 @@ func ListRelation() (map[string]float64, error) {
 		var q = fmt.Sprintf(`
 query data() {
 	data(func: has(name), first:%d, offset:%d) {
-		name
-	    links @facets(point) {
-			name
+		n:name
+	    l:links @facets(p:point) {
+			n:name
 	    }
 	}
 }`, first, offset)
@@ -29,7 +29,6 @@ query data() {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%s\n", string(resp.Json))
 
 		type Root struct {
 			Users []UserResp `json:"data"`

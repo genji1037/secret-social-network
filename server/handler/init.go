@@ -2,11 +2,8 @@ package handler
 
 import (
 	"context"
-	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
-	"log"
 	"net/http"
 	"secret-social-network/storage"
 )

@@ -25,8 +25,7 @@ func TreeDisableLoop(uid1, uid2 string, valueBal float64) ([]storage.UserResp, m
 	var q = `
 query All($name: string){
 	u0 as data(func: anyofterms(name, $name)) {
-		uid
-		name 
+		n:name 
 		%s
 	}
 }
@@ -42,9 +41,6 @@ query All($name: string){
 	}
 	// remove last 2 unused variable
 	q = strings.ReplaceAll(q, fmt.Sprintf("u%d as ", depth), "")
-	if depth > 1 {
-		q = strings.ReplaceAll(q, fmt.Sprintf("u%d as ", depth-1), "")
-	}
 
 	q = fmt.Sprintf(q, "")
 
@@ -53,7 +49,7 @@ query All($name: string){
 	variables["$name"] = uid1 + " " + uid2
 	resp, err := storage.Dg.NewTxn().QueryWithVars(ctx, q, variables)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("%s-%s%s: %s", uid1, uid2, q, err.Error())
 	}
 
 	result := struct {
@@ -69,18 +65,13 @@ query All($name: string){
 func embedLink(depth int, input string, point float64) string {
 	point = math.Floor(point)
 	// TODO: 同一层可能会出现多个相同节点，去掉相同节点，减少计算量
-	return fmt.Sprintf(input, fmt.Sprintf(`
-		%s links @facets(gt(point, %.0f)) %s {
-			name
-			uid
+	return fmt.Sprintf(input, fmt.Sprintf(`		%s l:links @facets(gt(point, %.0f)) @facets(p:point) %s {
+			n:name
 			%s
 		}`, fmt.Sprintf("u%d as", depth), point, genFilter(depth), "%s"))
 }
 
 func genFilter(depth int) string {
-	if depth > 1 {
-		depth--
-	}
 	filter := "@filter(not ("
 	first := true
 	for i := 0; i < depth; i++ {

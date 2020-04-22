@@ -1,10 +1,10 @@
 package storage
 
 type UserResp struct {
-	Name  string     `json:"name,omitempty"`
-	Links []UserResp `json:"links,omitempty"`
+	Name  string     `json:"n,omitempty"`
+	Links []UserResp `json:"l,omitempty"`
 
-	Point map[string]float64 `json:"links|point,omitempty"`
+	Point map[string]float64 `json:"p,omitempty"`
 }
 
 func (u UserResp) Walk(us []UserResp, depth int, fn func(u UserResp, depth int)) {
