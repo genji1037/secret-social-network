@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"math/rand"
+	"secret-social-network/storage"
 	"sync"
 	"testing"
 	"time"
@@ -12,19 +13,19 @@ func TestLink(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(4)
 	go func() {
-		link(1000, 5000, 100, "E")
+		link(100, 500, 100, "M")
 		wg.Done()
 	}()
 	go func() {
-		link(1000, 5000, 100, "F")
+		link(100, 500, 100, "N")
 		wg.Done()
 	}()
 	go func() {
-		link(1000, 5000, 100, "G")
+		link(100, 500, 100, "O")
 		wg.Done()
 	}()
 	go func() {
-		link(1000, 5000, 100, "H")
+		link(100, 500, 100, "P")
 		wg.Done()
 	}()
 	wg.Wait()
@@ -61,7 +62,8 @@ func link(uNum, rNum int, value float64, uPrefix string) {
 			i--
 			continue
 		}
-		err := Link(UID1, UID2, value)
+		err := storage.User{}.Link(UID1, UID2, value)
+		//err := Link(UID1, UID2, value)
 		if err != nil {
 			fmt.Printf("[ERROR] link failed: %s\n", err.Error())
 			i--

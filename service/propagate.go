@@ -39,7 +39,7 @@ func propagate() (map[string]float64, error) {
 		k string
 		v float64
 	}
-	agent := util.NewAgent(4, 1024, func(in interface{}) interface{} {
+	agent := util.NewAgent(1, 1024, func(in interface{}) interface{} {
 		kv := in.(workInput)
 		// 从一条关系开始拉取关系树
 		tree, depthHashMapper := listRelationTree(strings.Split(kv.k, "-"), kv.v)
@@ -71,7 +71,7 @@ func propagate() (map[string]float64, error) {
 
 func listRelationWithValue() (map[string]float64, error) {
 	startAt := time.Now()
-	rs, err := storage.ListRelation()
+	rs, err := storage.ListRelation(10000)
 	fmt.Printf("[listRelationWithValue] %s\n", time.Now().Sub(startAt))
 	return rs, err
 }

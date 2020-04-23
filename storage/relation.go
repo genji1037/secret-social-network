@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-// todo decouple logic and storage
-func ListRelation() (map[string]float64, error) {
-	first := 5000
+// ListRelation list all relation with it's point.
+func ListRelation(pageSize int) (map[string]float64, error) {
+	first := pageSize
 	offset := 0
 	relationValueMapper := make(map[string]float64)
 

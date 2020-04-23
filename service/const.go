@@ -1,5 +1,5 @@
 package service
 
 const (
-	valueRatio = float64(0.5)
+	valueRatio = float64(5) / float64(6)
 )

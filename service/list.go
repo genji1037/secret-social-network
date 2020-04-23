@@ -47,6 +47,9 @@ query All($name: string){
 	ctx := context.Background()
 	variables := make(map[string]string)
 	variables["$name"] = uid1 + " " + uid2
+
+	fmt.Println(uid1, uid2, q)
+
 	resp, err := storage.Dg.NewTxn().QueryWithVars(ctx, q, variables)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s-%s%s: %s", uid1, uid2, q, err.Error())

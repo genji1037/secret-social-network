@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/dgraph-io/dgo/protos/api"
 )
 
@@ -14,60 +15,57 @@ type User struct {
 	Point float64 `json:"links|point,omitempty"`
 }
 
-func (u *User) Save() error {
-	ctx := context.Background()
-	mu := &api.Mutation{
+// Link links two user with point
+func (User) Link(u1, u2 string, point float64) error {
+	query := fmt.Sprintf(`
+query {
+	u1 as q1(func: eq(name, "%s")) {
+		uid
+	}
+	u2 as q2(func: eq(name, "%s")) {
+		uid
+	}
+}`, u1, u2)
+	mus := []*api.Mutation{
+		{
+			Cond: `@if((not eq(len(u1),0)) and eq(len(u2),0))`,
+			SetNquads: []byte(`
+							_:u2 <name> "` + u2 + `" .
+							uid(u1) <links> _:u2 (point=` + fmt.Sprintf("%.0f", point) + `) .
+							_:u2 <links> uid(u1) (point=` + fmt.Sprintf("%.0f", point) + `) .`),
+		},
+		{
+			Cond: `@if(eq(len(u1),0) and (not eq(len(u2), 0)))`, // if u2 not exists
+			SetNquads: []byte(`
+							_:u1 <name> "` + u1 + `" .
+							_:u1 <links> uid(u2) (point=` + fmt.Sprintf("%.0f", point) + `) .
+							uid(u2) <links> _:u1 (point=` + fmt.Sprintf("%.0f", point) + `) .`),
+		},
+		{
+			Cond: `@if(eq(len(u1),0) and eq(len(u2),0))`,
+			SetNquads: []byte(`
+							_:u1 <name> "` + u1 + `" .
+							_:u2 <name> "` + u2 + `" .
+							_:u2 <links> _:u1 (point=` + fmt.Sprintf("%.0f", point) + `) .
+							_:u1 <links> _:u2 (point=` + fmt.Sprintf("%.0f", point) + `) .`),
+		},
+		{
+			Cond: `@if((not eq(len(u1),0)) and (not eq(len(u2),0)))`,
+			SetNquads: []byte(`
+							uid(u1) <links> uid(u2) (point=` + fmt.Sprintf("%.0f", point) + `) .
+							uid(u2) <links> uid(u1) (point=` + fmt.Sprintf("%.0f", point) + `) .`),
+		},
+	}
+	req := &api.Request{
+		Query:     query,
+		Mutations: mus,
 		CommitNow: true,
 	}
-	pb, err := json.Marshal(u)
-	if err != nil {
+	if _, err := Dg.NewTxn().Do(context.Background(), req); err != nil {
 		return err
 	}
 
-	mu.SetJson = pb
-
-	_, err = Dg.NewTxn().Mutate(ctx, mu)
-
-	err = u.QueryByName()
-
-	return err
-}
-
-func (u *User) QueryByName() error {
-	const q = `
-		query Me($name: string){
-			data(func: eq(name, $name)) {
-				uid
-				name
-			}
-		}
-	`
-	variables := make(map[string]string)
-	variables["$name"] = u.Name
-	ctx := context.Background()
-	resp, err := Dg.NewTxn().QueryWithVars(ctx, q, variables)
-	if err != nil {
-		return err
-	}
-
-	type Root struct {
-		Users []*User `json:"data"`
-	}
-
-	var r Root
-	err = json.Unmarshal(resp.Json, &r)
-	if err != nil {
-		return err
-	}
-
-	if len(r.Users) == 0 {
-		return nil
-	}
-
-	u.Uid = r.Users[0].Uid
-	u.Name = r.Users[0].Name
 	return nil
-
 }
 
 func QueryPoint(name1, name2 string) (float64, error) {
