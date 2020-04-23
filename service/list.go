@@ -48,8 +48,6 @@ query All($name: string){
 	variables := make(map[string]string)
 	variables["$name"] = uid1 + " " + uid2
 
-	fmt.Println(uid1, uid2, q)
-
 	resp, err := storage.Dg.NewTxn().QueryWithVars(ctx, q, variables)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s-%s%s: %s", uid1, uid2, q, err.Error())
@@ -68,25 +66,24 @@ query All($name: string){
 func embedLink(depth int, input string, point float64) string {
 	point = math.Floor(point)
 	// TODO: 同一层可能会出现多个相同节点，去掉相同节点，减少计算量
-	return fmt.Sprintf(input, fmt.Sprintf(`		%s l:links @facets(gt(point, %.0f)) @facets(p:point) %s {
+	return fmt.Sprintf(input, fmt.Sprintf(`		%s l:links @facets(gt(point, %.0f)) %s {
 			n:name
 			%s
 		}`, fmt.Sprintf("u%d as", depth), point, genFilter(depth), "%s"))
 }
 
 func genFilter(depth int) string {
-	filter := "@filter(not ("
+	filter := "@filter(not (uid("
 	first := true
 	for i := 0; i < depth; i++ {
 		if first {
 			first = false
 		} else {
-			filter += " or "
+			filter += ","
 		}
-		filter += "uid(u"
+		filter += "u"
 		filter += strconv.Itoa(i)
-		filter += ")"
 	}
-	filter += "))"
+	filter += ")))"
 	return filter
 }

@@ -13,19 +13,19 @@ func TestLink(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(4)
 	go func() {
-		link(100, 500, 100, "M")
+		link(1000, 5000, 100, "A")
 		wg.Done()
 	}()
 	go func() {
-		link(100, 500, 100, "N")
+		link(1000, 5000, 100, "B")
 		wg.Done()
 	}()
 	go func() {
-		link(100, 500, 100, "O")
+		link(1000, 5000, 100, "C")
 		wg.Done()
 	}()
 	go func() {
-		link(100, 500, 100, "P")
+		link(1000, 5000, 100, "D")
 		wg.Done()
 	}()
 	wg.Wait()
