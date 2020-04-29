@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"secret-social-network/model"
 	"secret-social-network/storage"
 	"secret-social-network/util"
 	"strings"
@@ -9,28 +10,13 @@ import (
 	"time"
 )
 
-type result struct {
-	assignmentCount int
-	resultHashes    map[string]float64
-	sync.Mutex
-}
-
-func (r *result) add(subResultHashes map[string]float64) {
-	r.Lock()
-	r.assignmentCount += len(subResultHashes)
-	for k, v := range subResultHashes {
-		r.resultHashes[k] += v
-	}
-	r.Unlock()
-}
-
 func propagate() (map[string]float64, error) {
-	res := result{
-		assignmentCount: 0,
-		resultHashes:    make(map[string]float64),
+	res := model.Result{
+		AssignmentCount: 0,
+		ResultHashes:    make(map[string]float64),
 	}
 	startAt := time.Now()
-	originValues, err := listRelationWithValue()
+	originValues, err := ListRelationWithValue()
 	if err != nil {
 		return nil, err
 	}
@@ -61,18 +47,18 @@ func propagate() (map[string]float64, error) {
 				v: v,
 			})
 			out := <-c
-			res.add(out.(map[string]float64))
+			res.Add(out.(map[string]float64))
 		}()
 	}
 	wg.Wait()
-	fmt.Printf("[propagate] %d relations %d assignment cost %s\n", len(originValues), res.assignmentCount, time.Now().Sub(startAt))
-	return res.resultHashes, nil
+	fmt.Printf("[propagate] %d relations %d assignment cost %s\n", len(originValues), res.AssignmentCount, time.Now().Sub(startAt))
+	return res.ResultHashes, nil
 }
 
-func listRelationWithValue() (map[string]float64, error) {
+func ListRelationWithValue() (map[string]float64, error) {
 	startAt := time.Now()
-	rs, err := storage.ListRelation(10000)
-	fmt.Printf("[listRelationWithValue] %s\n", time.Now().Sub(startAt))
+	rs, err := storage.ListRelation(5000)
+	fmt.Printf("[ListRelationWithValue] %s\n", time.Now().Sub(startAt))
 	return rs, err
 }
 

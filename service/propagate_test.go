@@ -14,7 +14,7 @@ func TestPropagate(t *testing.T) {
 }
 
 func TestListRelationWithValue(t *testing.T) {
-	rs, err := listRelationWithValue()
+	rs, err := ListRelationWithValue()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
