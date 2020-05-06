@@ -53,7 +53,7 @@ func (db *db) Link(uid1, uid2 string, value float64) {
 	u1.Consensus = append(u1.Consensus, u2)
 	u1.Values = append(u1.Values, value)
 	u2.Consensus = append(u2.Consensus, u1)
-	u1.Values = append(u1.Values, value)
+	u2.Values = append(u2.Values, value)
 }
 
 func (db *db) PropagateAll() map[string]float64 {
@@ -62,7 +62,7 @@ func (db *db) PropagateAll() map[string]float64 {
 		ResultHashes: make(map[string]float64),
 	}
 
-	agent := util.NewAgent(4, 1024, func(in interface{}) interface{} {
+	agent := util.NewAgent(4, 0, func(in interface{}) interface{} {
 		link := in.(Link)
 		subResult, err := db.Propagate(link.UID1, link.UID2, link.Value)
 		if err != nil {
@@ -72,18 +72,31 @@ func (db *db) PropagateAll() map[string]float64 {
 	})
 
 	wg := sync.WaitGroup{}
+	done := 0
+	allWork := len(db.links)
+	go watchProgress(&done, allWork)
 	for i := range db.links {
 		wg.Add(1)
-		go func(i int) {
+		c := agent.Do(db.links[i])
+		go func(c chan interface{}) {
 			defer wg.Done()
-			c := agent.Do(db.links[i])
 			out := <-c
 			result.Add(out.(map[string]float64))
-		}(i)
+			done++
+		}(c)
 	}
+
 	wg.Wait()
-	fmt.Printf("[all] %s\n", time.Now().Sub(startAt))
+	elapsed := time.Now().Sub(startAt)
+	fmt.Printf("[propagate] %d nodes %d links %d assign cost %s\n", len(db.nodes), len(db.links), result.AssignmentCount, elapsed)
 	return result.ResultHashes
+}
+
+func watchProgress(inProgress *int, all int) {
+	for {
+		time.Sleep(20 * time.Second)
+		fmt.Printf("%d/%d\n", *inProgress, all)
+	}
 }
 
 func (db *db) Propagate(uid1, uid2 string, value float64) (map[string]float64, error) {

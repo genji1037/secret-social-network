@@ -12,12 +12,12 @@ import (
 func TestLink(t *testing.T) {
 	wg := sync.WaitGroup{}
 
-	uPrefixes := []string{"A", "B", "C", "D"}
+	uPrefixes := []string{"E", "F", "G", "H"}
 
 	wg.Add(len(uPrefixes))
 	for _, uPrefix := range uPrefixes {
 		go func(up string) {
-			link(1000, 5000, 100, up)
+			link(10000, 20000, 100, up)
 			wg.Done()
 		}(uPrefix)
 	}

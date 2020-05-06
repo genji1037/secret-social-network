@@ -62,7 +62,9 @@ func TestBenchPropagate(t *testing.T) {
 	startAt := time.Now()
 	for relation, value := range relations {
 		tmp := strings.Split(relation, "-")
-		db.Link(tmp[0], tmp[1], value)
+		if tmp[0] < tmp[1] { // 双向关系去重
+			db.Link(tmp[0], tmp[1], value)
+		}
 	}
 	fmt.Printf("[link] %s\n", time.Now().Sub(startAt))
 
