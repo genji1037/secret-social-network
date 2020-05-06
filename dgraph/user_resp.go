@@ -1,4 +1,4 @@
-package storage
+package dgraph
 
 type UserResp struct {
 	Name  string     `json:"n,omitempty"`

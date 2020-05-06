@@ -1,4 +1,4 @@
-package storage
+package dgraph
 
 import (
 	"github.com/dgraph-io/dgo"

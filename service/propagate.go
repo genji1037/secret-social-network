@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
+	"secret-social-network/dgraph"
 	"secret-social-network/model"
-	"secret-social-network/storage"
 	"secret-social-network/util"
 	"strings"
 	"sync"
@@ -57,12 +57,12 @@ func propagate() (map[string]float64, error) {
 
 func ListRelationWithValue() (map[string]float64, error) {
 	startAt := time.Now()
-	rs, err := storage.ListRelation(5000)
+	rs, err := dgraph.ListRelation(5000)
 	fmt.Printf("[ListRelationWithValue] %s\n", time.Now().Sub(startAt))
 	return rs, err
 }
 
-func listRelationTree(us []string, value float64) ([]storage.UserResp, map[int]float64) {
+func listRelationTree(us []string, value float64) ([]dgraph.UserResp, map[int]float64) {
 	startAt := time.Now()
 	if len(us) != 2 {
 		fmt.Printf("[ERROR] list relation tree by us[%+v] failed: \n", us)
@@ -78,11 +78,11 @@ func listRelationTree(us []string, value float64) ([]storage.UserResp, map[int]f
 }
 
 // 分配算力
-func assignHash(tree []storage.UserResp, depthHashMapper map[int]float64) map[string]float64 {
+func assignHash(tree []dgraph.UserResp, depthHashMapper map[int]float64) map[string]float64 {
 	startAt := time.Now()
 	// 根据树的深度 原始价值 分配算力到values 和 resultHashes里
 	resultHashes := make(map[string]float64)
-	storage.UserResp{}.Walk(tree, 0, func(u storage.UserResp, depth int) {
+	dgraph.UserResp{}.Walk(tree, 0, func(u dgraph.UserResp, depth int) {
 		if depth > 0 {
 			hash := depthHashMapper[depth]
 			resultHashes[u.Name] = hash

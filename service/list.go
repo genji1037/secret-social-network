@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"secret-social-network/storage"
+	"secret-social-network/dgraph"
 	"strconv"
 	"strings"
 )
 
 // List list.
-func List(uid1, uid2 string) ([]storage.UserResp, map[int]float64, error) {
-	pointBal, err := storage.QueryPoint(uid1, uid2)
+func List(uid1, uid2 string) ([]dgraph.UserResp, map[int]float64, error) {
+	pointBal, err := dgraph.QueryPoint(uid1, uid2)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -21,7 +21,7 @@ func List(uid1, uid2 string) ([]storage.UserResp, map[int]float64, error) {
 }
 
 // 拉取关系树（禁止循环）
-func TreeDisableLoop(uid1, uid2 string, valueBal float64) ([]storage.UserResp, map[int]float64, error) {
+func TreeDisableLoop(uid1, uid2 string, valueBal float64) ([]dgraph.UserResp, map[int]float64, error) {
 	var q = `
 query All($name: string){
 	u0 as data(func: anyofterms(name, $name)) {
@@ -48,13 +48,13 @@ query All($name: string){
 	variables := make(map[string]string)
 	variables["$name"] = uid1 + " " + uid2
 
-	resp, err := storage.Dg.NewTxn().QueryWithVars(ctx, q, variables)
+	resp, err := dgraph.Dg.NewTxn().QueryWithVars(ctx, q, variables)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s-%s%s: %s", uid1, uid2, q, err.Error())
 	}
 
 	result := struct {
-		Data []storage.UserResp
+		Data []dgraph.UserResp
 	}{}
 	if err := json.Unmarshal(resp.Json, &result); err != nil {
 		return nil, nil, err

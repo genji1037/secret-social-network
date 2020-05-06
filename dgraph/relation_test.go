@@ -1,4 +1,4 @@
-package storage
+package dgraph
 
 import (
 	"crypto/md5"

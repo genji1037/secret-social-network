@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 	"math/rand"
-	"secret-social-network/storage"
+	"secret-social-network/dgraph"
 	"sync"
 	"testing"
 	"time"
@@ -55,7 +55,7 @@ func link(uNum, rNum int, value float64, uPrefix string) {
 			i--
 			continue
 		}
-		err := storage.User{}.Link(UID1, UID2, value)
+		err := dgraph.User{}.Link(UID1, UID2, value)
 		//err := Link(UID1, UID2, value)
 		if err != nil {
 			fmt.Printf("[ERROR] link failed: %s\n", err.Error())
