@@ -2,7 +2,7 @@ package memgraph
 
 import (
 	"fmt"
-	"secret-social-network/service"
+	"secret-social-network/app/service"
 	"strings"
 	"testing"
 	"time"

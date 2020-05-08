@@ -2,8 +2,8 @@ package memgraph
 
 import (
 	"fmt"
-	"secret-social-network/model"
-	"secret-social-network/util"
+	"secret-social-network/app/model"
+	"secret-social-network/app/util"
 	"sync"
 	"time"
 )
@@ -58,7 +58,7 @@ func (db *db) Link(uid1, uid2 string, value float64) {
 
 func (db *db) PropagateAll() map[string]float64 {
 	startAt := time.Now()
-	result := model.Result{
+	result := model.HashRateResult{
 		ResultHashes: make(map[string]float64),
 	}
 

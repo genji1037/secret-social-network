@@ -2,16 +2,16 @@ package service
 
 import (
 	"fmt"
-	"secret-social-network/dgraph"
-	"secret-social-network/model"
-	"secret-social-network/util"
+	"secret-social-network/app/dgraph"
+	"secret-social-network/app/model"
+	"secret-social-network/app/util"
 	"strings"
 	"sync"
 	"time"
 )
 
 func propagate() (map[string]float64, error) {
-	res := model.Result{
+	res := model.HashRateResult{
 		AssignmentCount: 0,
 		ResultHashes:    make(map[string]float64),
 	}

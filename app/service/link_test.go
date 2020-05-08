@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 	"math/rand"
-	"secret-social-network/dgraph"
+	"secret-social-network/app/dgraph"
 	"sync"
 	"testing"
 	"time"

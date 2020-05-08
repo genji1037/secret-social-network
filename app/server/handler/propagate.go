@@ -3,8 +3,8 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"secret-social-network/memgraph"
-	"secret-social-network/service"
+	"secret-social-network/app/memgraph"
+	"secret-social-network/app/service"
 	"strings"
 	"time"
 )

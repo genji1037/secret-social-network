@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"secret-social-network/dgraph"
+	"secret-social-network/app/dgraph"
 	"strconv"
 	"strings"
 )
 
 // List list.
 func List(uid1, uid2 string) ([]dgraph.UserResp, map[int]float64, error) {
-	pointBal, err := dgraph.QueryPoint(uid1, uid2)
+	pointBal, err := dgraph.QueryValue(uid1, uid2)
 	if err != nil {
 		return nil, nil, err
 	}

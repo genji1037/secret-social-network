@@ -5,7 +5,7 @@ import (
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"secret-social-network/dgraph"
+	"secret-social-network/app/dgraph"
 )
 
 func Init(c *gin.Context) {
