@@ -46,9 +46,23 @@ func ConsensusUnlink(c *gin.Context) {
 		return
 	}
 
+	// get uid from open platform.
+	UID1, UID2, err := client.GetUID(req.AppID, req.OpenID1, req.OpenID2)
+	if err != nil {
+		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
+		log.Error("get uid from open platform failed: %s", err.Error())
+		return
+	}
+
 	tx := storage.TxBegin()
 	// mark order unlink
-	//todo
+	err = storage.ConsensusOrder{}.BatchUnlinkTx(tx, unlinkedOrderIDs)
+	if err != nil {
+		log.WithField("orderIDs", unlinkedOrderIDs).Warnf("batch unlink failed: %s", err.Error())
+		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
+		tx.Rollback()
+		return
+	}
 
 	// write link log
 	value := unlinkedValue.Neg()
@@ -61,6 +75,7 @@ func ConsensusUnlink(c *gin.Context) {
 		State:   storage.ConsensusLinkLogStateWait,
 	}
 	if err := linkLog.CreateTx(tx); err != nil {
+		log.WithField("linkLog", linkLog).Warnf("create unlink log failed: %s", err.Error())
 		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
 		tx.Rollback()
 		return
@@ -69,12 +84,6 @@ func ConsensusUnlink(c *gin.Context) {
 	tx.Commit()
 
 	// rewrite link value at d-graph
-	UID1, UID2, err := client.GetUID(req.AppID, req.OpenID1, req.OpenID2)
-	if err != nil {
-		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
-		log.Error("get uid from open platform failed: %s", err.Error())
-		return
-	}
 	valueF, _ := value.Float64()
 	err = dgraph.User{}.LinkOrAdd(req.AppID, UID1, UID2, valueF)
 	if err != nil {

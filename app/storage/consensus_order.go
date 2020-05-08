@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
 	"secret-social-network/app/model"
 	"time"
@@ -36,6 +37,10 @@ func (c *ConsensusOrder) ChState(old, new model.ConsensusOrderState) (int64, err
 		Where("id = ? and state = ?", c.ID, old).
 		UpdateColumn("state", new)
 	return db.RowsAffected, db.Error
+}
+
+func (ConsensusOrder) BatchUnlinkTx(tx *gorm.DB, orderIDs []string) error {
+	return tx.Model(new(ConsensusOrder)).Where("order_id in (?)", orderIDs).UpdateColumn("unlinked", true).Error
 }
 
 // LinkedList list all confirm and not unlinked orders.
