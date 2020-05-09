@@ -7,17 +7,17 @@ import (
 
 var gManager *Manager
 
-// 配置管理器
+// Manager manage configs.
 type Manager struct {
 	serve *Serve
 }
 
-// 获取服务配置
+// GetServe get serve config.
 func GetServe() Serve {
 	return *gManager.serve
 }
 
-// 加载配置文件
+// LoadConfig load config.
 func LoadConfig(path string) error {
 	// 读取基本配置
 	data, err := ioutil.ReadFile(path)

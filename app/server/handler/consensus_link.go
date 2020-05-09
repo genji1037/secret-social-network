@@ -9,7 +9,7 @@ import (
 	"secret-social-network/app/service"
 )
 
-type LinkRequest struct {
+type linkRequest struct {
 	AppID   string          `json:"app_id" binding:"required"`
 	OpenID1 string          `json:"open_id1" binding:"required,uuid"`
 	OpenID2 string          `json:"open_id2" binding:"required,uuid"`
@@ -17,8 +17,9 @@ type LinkRequest struct {
 	Value2  decimal.Decimal `json:"value2" binding:"required,gte=0"`
 }
 
+// ConsensusLink consensus link handler.
 func ConsensusLink(c *gin.Context) {
-	req := LinkRequest{}
+	req := linkRequest{}
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusOK, err.Error())
 		return

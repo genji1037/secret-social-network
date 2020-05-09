@@ -1,6 +1,6 @@
 package storage
 
-// 连接信息
+// Connection represent mysql connection info.
 type Connection struct {
 	Host         string
 	User         string

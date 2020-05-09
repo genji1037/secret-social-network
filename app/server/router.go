@@ -3,10 +3,10 @@ package server
 import (
 	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
-	_ "net/http/pprof"
 	"secret-social-network/app/server/handler"
 )
 
+// Run runs REST server.
 func Run(addr string) error {
 	r := gin.New()
 	ginpprof.Wrap(r)
@@ -22,8 +22,8 @@ func Run(addr string) error {
 		consensus.DELETE("/relation", handler.ConsensusUnlink)
 	}
 
-	r.POST("/init", handler.Init)
-	r.GET("/propagate", handler.Propagate)
+	//r.POST("/init", handler.Init)
+	//r.GET("/propagate", handler.Propagate)
 
 	return r.Run(addr)
 }

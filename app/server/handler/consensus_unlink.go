@@ -13,14 +13,15 @@ import (
 	"secret-social-network/app/storage"
 )
 
-type ConsensusUnlinkRequest struct {
+type consensusUnlinkRequest struct {
 	OpenID1 string `json:"open_id1"`
 	OpenID2 string `json:"open_id2"`
 	AppID   string `json:"app_id"`
 }
 
+// ConsensusUnlink represent consensus unlink handler.
 func ConsensusUnlink(c *gin.Context) {
-	req := ConsensusUnlinkRequest{}
+	req := consensusUnlinkRequest{}
 	if err := c.ShouldBind(&req); err != nil {
 		respond.Error(c, http.StatusBadRequest, respond.BadRequest(err.Error()))
 		return
@@ -57,7 +58,7 @@ func ConsensusUnlink(c *gin.Context) {
 	if err != nil {
 		tx.Rollback()
 		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
-		log.Error("get uid from open platform failed: %s", err.Error())
+		log.Errorf("get uid from open platform failed: %s", err.Error())
 		return
 	}
 
@@ -76,7 +77,7 @@ func ConsensusUnlink(c *gin.Context) {
 
 	// rewrite link value at d-graph
 	valueF, _ := value.Float64()
-	err = dgraph.User{}.LinkOrAdd(req.AppID, UID1, UID2, valueF)
+	err = dgraph.LinkOrAdd(req.AppID, UID1, UID2, valueF)
 	ok := true
 	if err != nil {
 		ok = false

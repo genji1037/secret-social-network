@@ -8,25 +8,29 @@ import (
 	"time"
 )
 
+// Link represent consensus relation between two use.
 type Link struct {
 	UID1  string
 	UID2  string
 	Value float64
 }
 
-type db struct {
+// DB is in memory graph db to speed up some offline job.
+type DB struct {
 	nodes map[string]*Node
 	links []Link
 }
 
-func NewMemDB() *db {
-	return &db{
+// NewMemDB new a graph DB in memory
+func NewMemDB() *DB {
+	return &DB{
 		nodes: make(map[string]*Node),
 		links: make([]Link, 0),
 	}
 }
 
-func (db *db) Link(uid1, uid2 string, value float64) {
+// Link link two users.
+func (db *DB) Link(uid1, uid2 string, value float64) {
 	db.links = append(db.links, Link{
 		UID1:  uid1,
 		UID2:  uid2,
@@ -56,7 +60,8 @@ func (db *db) Link(uid1, uid2 string, value float64) {
 	u2.Values = append(u2.Values, value)
 }
 
-func (db *db) PropagateAll() map[string]float64 {
+// PropagateAll propagate value for all relation.
+func (db *DB) PropagateAll() map[string]float64 {
 	startAt := time.Now()
 	result := model.HashRateResult{
 		ResultHashes: make(map[string]float64),
@@ -99,7 +104,8 @@ func watchProgress(inProgress *int, all int) {
 	}
 }
 
-func (db *db) Propagate(uid1, uid2 string, value float64) (map[string]float64, error) {
+// Propagate start propagate.
+func (db *DB) Propagate(uid1, uid2 string, value float64) (map[string]float64, error) {
 	//startAt := time.Now()
 
 	result := make(map[string]float64)
@@ -111,8 +117,8 @@ func (db *db) Propagate(uid1, uid2 string, value float64) (map[string]float64, e
 }
 
 func assignHashRate(nodes []*Node, value float64, result map[string]float64) {
-	subValue := value * AttenuationRate
-	if subValue < MinValue { // 价值衰减到低于最小值 10
+	subValue := value * attenuationRate
+	if subValue < minValue { // 价值衰减到低于最小值 10
 		return
 	}
 	subNodes := make([]*Node, 0)

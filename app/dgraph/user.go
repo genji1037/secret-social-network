@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	FacetsPrefix   = "cons|"
-	FacetsTotalKey = "total"
+	facetsPrefix   = "cons|"
+	facetsTotalKey = "total"
 )
 
-type User struct{}
-
-func (User) LinkOrAdd(appID, u1, u2 string, value float64) error {
+// LinkOrAdd links two user with its value,
+// or add link value when two user are already linked.
+func LinkOrAdd(appID, u1, u2 string, value float64) error {
 
 	commitCount := 0
 
@@ -61,7 +61,7 @@ top:
 		return err
 	}
 
-	totalFacetsMap, ok := r.Users[0][FacetsPrefix+FacetsTotalKey].(map[string]interface{})
+	totalFacetsMap, ok := r.Users[0][facetsPrefix+facetsTotalKey].(map[string]interface{})
 	if !ok {
 		return err
 	}
@@ -71,7 +71,7 @@ top:
 	}
 	totalValue := total + value
 
-	appFacetsMap, ok := r.Users[0][FacetsPrefix+appID].(map[string]interface{})
+	appFacetsMap, ok := r.Users[0][facetsPrefix+appID].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("users[0] is not a map")
 	}
@@ -92,7 +92,7 @@ query {
 }`, u1, u2)
 	appV := fmt.Sprintf("%f", appValue)
 	totalV := fmt.Sprintf("%f", totalValue)
-	facets := FacetsTotalKey + `=` + totalV + `, ` + appID + `=` + appV
+	facets := facetsTotalKey + `=` + totalV + `, ` + appID + `=` + appV
 	mus := []*api.Mutation{
 		{
 			Cond: `@if((not eq(len(u1),0)) and eq(len(u2),0))`, // u1 exist, u2 not exists.

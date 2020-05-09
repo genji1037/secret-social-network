@@ -2,7 +2,7 @@ package config
 
 import log "github.com/sirupsen/logrus"
 
-// 服务配置
+// Serve is server config.
 type Serve struct {
 	Host      string       `yaml:"host"`      // 主机地址
 	Port      int          `yaml:"port"`      // 端口号
@@ -13,9 +13,10 @@ type Serve struct {
 	Consensus Consensus    `yaml:"consensus"` // 共识模块
 }
 
-// 日志级别
+// Level is log level.
 type Level string
 
+// Value get log level value.
 func (level Level) Value() log.Level {
 	lvl, err := log.ParseLevel(string(level))
 	if err != nil {
@@ -24,7 +25,7 @@ func (level Level) Value() log.Level {
 	return lvl
 }
 
-// MySQL配置
+// MySQL config.
 type MySQL struct {
 	Host         string `yaml:"host"`
 	User         string `yaml:"user"`
@@ -36,17 +37,21 @@ type MySQL struct {
 	MaxOpenConns int    `yaml:"max_open_conns"`
 }
 
+// DGraph config.
 type DGraph struct {
 	Addr string `yaml:"addr"`
 }
 
+// OpenPlatform config.
 type OpenPlatform struct {
 	BaseURL string  `yaml:"base_url"`
 	AppKeys AppKeys `yaml:"app_keys"`
 }
 
+// AppKeys contain app id and corresponding secret key.
 type AppKeys []AppKey
 
+// GetByAppID get secret key by corresponding app id.
 func (a AppKeys) GetByAppID(appID string) string {
 	for i := range a {
 		if a[i].AppID == appID {
@@ -56,11 +61,13 @@ func (a AppKeys) GetByAppID(appID string) string {
 	return ""
 }
 
+// AppKey config.
 type AppKey struct {
 	AppID     string `yaml:"app_id"`
 	SecretKey string `yaml:"secret_key"`
 }
 
+// Consensus config.
 type Consensus struct {
 	Token         string `yaml:"token"`          // 建立连接使用的币种
 	PaymentRemark string `yaml:"payment_remark"` // 支付备注

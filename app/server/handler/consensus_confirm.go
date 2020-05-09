@@ -11,6 +11,7 @@ import (
 	"secret-social-network/app/storage"
 )
 
+// ConsensusConfirm is consensus confirm handler.
 func ConsensusConfirm(c *gin.Context) {
 	orderID := c.Param("orderID")
 
@@ -29,7 +30,7 @@ func ConsensusConfirm(c *gin.Context) {
 
 	// validate state
 	if order.LinkState != model.ConsensusOrderLinkStateWait {
-		logger.Warnf("[REST] trying confirm consensus order %d that already confirmed", order.OrderID)
+		logger.Warnf("[REST] trying confirm consensus order %s that already confirmed", order.OrderID)
 		respond.Error(c, http.StatusBadRequest, respond.AlreadyConfirmed)
 		return
 	}
@@ -41,7 +42,7 @@ func ConsensusConfirm(c *gin.Context) {
 		return
 	}
 	if rowAffected == 0 { // confirmed by other thread
-		logger.Warnf("[REST] trying confirm consensus order %d that already confirmed by other parallel thread", order.OrderID)
+		logger.Warnf("[REST] trying confirm consensus order %s that already confirmed by other parallel thread", order.OrderID)
 		respond.Error(c, http.StatusBadRequest, respond.AlreadyConfirmed)
 		return
 	}

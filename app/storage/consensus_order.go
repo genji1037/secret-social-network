@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// ConsensusOrder represent mysql table data model.
 type ConsensusOrder struct {
 	ID          uint `gorm:"primary_key"`
 	CreatedAt   time.Time
@@ -27,14 +28,17 @@ type ConsensusOrder struct {
 	UnlinkedAt  *time.Time
 }
 
+// Create create consensus order record.
 func (c *ConsensusOrder) Create() error {
 	return gormDb.Create(c).Error
 }
 
+// Query query a consensus order by provide condition.
 func (c *ConsensusOrder) Query() error {
 	return gormDb.Model(c).Where(c).Last(c).Error
 }
 
+// ChLinkState change link state, and return the changed record number.
 func (c *ConsensusOrder) ChLinkState(old, new model.ConsensusOrderLinkState) (int64, error) {
 	db := gormDb.Model(c).
 		Where("id = ? and link_state = ?", c.ID, old)
@@ -51,10 +55,7 @@ func (c *ConsensusOrder) ChLinkState(old, new model.ConsensusOrderLinkState) (in
 	return db.RowsAffected, db.Error
 }
 
-func (ConsensusOrder) List() {
-
-}
-
+// BatchChUnlinkState batch change unlink state.
 func (ConsensusOrder) BatchChUnlinkState(tx *gorm.DB, ids []uint, state model.ConsensusOrderUnlinkState) error {
 	db := gormDb
 	if tx != nil {
@@ -75,7 +76,7 @@ func (ConsensusOrder) BatchChUnlinkState(tx *gorm.DB, ids []uint, state model.Co
 	return db.Error
 }
 
-// LinkedList list all confirm and not unlinked orders.
+// LinkedListForUpdate list all confirm and not unlinked orders.
 func (ConsensusOrder) LinkedListForUpdate(tx *gorm.DB, appID, UID1, UID2 string) ([]ConsensusOrder, error) {
 	rs := make([]ConsensusOrder, 0)
 	err := tx.Model(new(ConsensusOrder)).
@@ -86,6 +87,7 @@ func (ConsensusOrder) LinkedListForUpdate(tx *gorm.DB, appID, UID1, UID2 string)
 	return rs, err
 }
 
+// Set generate consensus order data model from mysql table data model.
 func (c *ConsensusOrder) Set() model.ConsensusOrder {
 	return model.ConsensusOrder{
 		CreatedAt: c.CreatedAt.Unix(),

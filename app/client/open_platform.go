@@ -22,6 +22,7 @@ type OpenResult struct {
 	Msg  string                 `json:"msg"`
 }
 
+// ApplyPaymentArgs represent args for apply payment.
 type ApplyPaymentArgs struct {
 	AppID   string
 	OpenID  string
@@ -59,6 +60,7 @@ func ApplyPayment(args ApplyPaymentArgs) (string, error) {
 	return tradeNo, nil
 }
 
+// GetUID is convenience func get uid by open id and app id.
 func GetUID(appID, openID1, openID2 string) (string, string, error) {
 	UIDs, err := BatchGetUID(appID, []string{openID1, openID2})
 	if err != nil {

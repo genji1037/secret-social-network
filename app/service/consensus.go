@@ -7,6 +7,7 @@ import (
 	"secret-social-network/app/storage"
 )
 
+// CreateConsensusRelation asynchronously create consensus relation at dGraph.
 func CreateConsensusRelation(order storage.ConsensusOrder) {
 	// TODO:⭐⭐ gracefully shutdown
 
@@ -20,7 +21,7 @@ func CreateConsensusRelation(order storage.ConsensusOrder) {
 	}
 	value := value1.Add(value2)
 	valueF, _ := value.Float64()
-	err := dgraph.User{}.LinkOrAdd(order.AppID, order.UID1, order.UID2, valueF)
+	err := dgraph.LinkOrAdd(order.AppID, order.UID1, order.UID2, valueF)
 	ok := true
 	if err != nil {
 		log.WithFields(log.Fields{

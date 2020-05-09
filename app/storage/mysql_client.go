@@ -3,7 +3,6 @@ package storage
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 	"secret-social-network/app/config"
@@ -12,7 +11,7 @@ import (
 // 数据库实例
 var gormDb *gorm.DB
 
-// 数据表接口
+// Table interface.
 type Table interface {
 	Create() error
 }
@@ -22,15 +21,16 @@ var tables = []Table{
 	new(ConsensusOrder),
 }
 
-// 排序方式
+// OrderBy is order by direction.
 type OrderBy string
 
+// Order by direction.
 const (
 	OrderByAsc  OrderBy = "asc"
 	OrderByDesc OrderBy = "desc"
 )
 
-// 打开数据库
+// Open opens mysql database.
 func Open(conn Connection) error {
 	var err error
 	args := fmt.Sprintf("%s:%s@tcp(%s)/?charset=%s&parseTime=True&loc=%s",
@@ -66,15 +66,6 @@ func Open(conn Connection) error {
 	return nil
 }
 
-// 开始事务
-func Transaction() (tx *gorm.DB, err error) {
-	tx = gormDb.Begin()
-	if err = tx.Error; err != nil {
-		return nil, err
-	}
-	return tx, nil
-}
-
 // 确保表存在
 func ensureTable(table interface{}) {
 	typ := reflect.TypeOf(table)
@@ -95,6 +86,7 @@ func ensureTable(table interface{}) {
 	}
 }
 
+// TxBegin begin a transaction.
 func TxBegin() *gorm.DB {
 	return gormDb.Begin()
 }

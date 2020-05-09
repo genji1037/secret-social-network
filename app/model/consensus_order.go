@@ -2,7 +2,10 @@ package model
 
 import "github.com/shopspring/decimal"
 
+// ConsensusOrderLinkState represent consensus order's link state.
 type ConsensusOrderLinkState string
+
+// ConsensusOrderUnlinkState represent consensus order's unlink state.
 type ConsensusOrderUnlinkState string
 
 /**
@@ -24,6 +27,7 @@ const (
 
 )
 
+// ConsensusOrder represent consensus order data model.
 type ConsensusOrder struct {
 	CreatedAt int64            `json:"created_at"`
 	UpdatedAt int64            `json:"updated_at"`

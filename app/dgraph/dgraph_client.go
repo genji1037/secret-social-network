@@ -7,8 +7,10 @@ import (
 	"secret-social-network/app/config"
 )
 
+// Dg is dGraph client.
 var Dg *dgo.Dgraph
 
+// Open connecting to dGraph.
 func Open(cfg config.DGraph) error {
 	conn, err := grpc.Dial(cfg.Addr, grpc.WithInsecure())
 	if err != nil {

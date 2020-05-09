@@ -18,11 +18,11 @@ func ListRelation(pageSize int) (map[string]float64, error) {
 query data() {
 	data(func: has(name), first:%d, offset:%d) {
 		n:name
-	    l:links @facets(p:point) {
+	    l:cons @facets(v:%s) {
 			n:name
 	    }
 	}
-}`, first, offset)
+}`, first, offset, facetsPrefix+facetsTotalKey)
 		offset += first
 		ctx := context.Background()
 		resp, err := Dg.NewTxn().Query(ctx, q)

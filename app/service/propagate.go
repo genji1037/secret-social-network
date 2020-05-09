@@ -51,6 +51,7 @@ import (
 //	return res.ResultHashes, nil
 //}
 
+// ListRelationWithValue list relation and value persisted in dGraph.
 func ListRelationWithValue() (map[string]float64, error) {
 	startAt := time.Now()
 	rs, err := dgraph.ListRelation(5000)

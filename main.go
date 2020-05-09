@@ -1,7 +1,9 @@
 package main
 
 import (
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	log "github.com/sirupsen/logrus"
+	_ "net/http/pprof"
 	"secret-social-network/app/config"
 	"secret-social-network/app/dgraph"
 	"secret-social-network/app/server"

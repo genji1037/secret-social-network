@@ -84,6 +84,7 @@ func CreateConsensusOrder(appID, openID1, openID2 string, value1, value2 decimal
 	return &orderResp, nil
 }
 
+// CommitLink executed after successfully committed at dGraph.
 func CommitLink(order storage.ConsensusOrder, ok bool) {
 	state := model.ConsensusOrderLinkStateDone
 	if !ok {
@@ -91,10 +92,11 @@ func CommitLink(order storage.ConsensusOrder, ok bool) {
 	}
 	rowAffected, err := order.ChLinkState(model.ConsensusOrderLinkStateConfirmed, state)
 	if err != nil || rowAffected == 0 {
-		log.Errorf("commit link order %d [%s] failed", order.OrderID, state)
+		log.Errorf("commit link order %s [%s] failed", order.OrderID, state)
 	}
 }
 
+// CommitUnlink executed after successfully committed at dGraph.
 func CommitUnlink(ids []uint, ok bool) {
 	state := model.ConsensusOrderUnlinkStateDone
 	if !ok {
