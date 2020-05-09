@@ -28,14 +28,14 @@ func ConsensusConfirm(c *gin.Context) {
 	}
 
 	// validate state
-	if order.State != model.ConsensusOrderStateWait {
+	if order.LinkState != model.ConsensusOrderLinkStateWait {
 		logger.Warnf("[REST] trying confirm consensus order %d that already confirmed", order.OrderID)
 		respond.Error(c, http.StatusBadRequest, respond.AlreadyConfirmed)
 		return
 	}
 
 	// confirm
-	rowAffected, err := order.ChState(model.ConsensusOrderStateWait, model.ConsensusOrderStateConfirmed)
+	rowAffected, err := order.ChLinkState(model.ConsensusOrderLinkStateWait, model.ConsensusOrderLinkStateConfirmed)
 	if err != nil {
 		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
 		return

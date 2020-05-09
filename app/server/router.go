@@ -23,7 +23,6 @@ func Run(addr string) error {
 	}
 
 	r.POST("/init", handler.Init)
-	r.GET("/query", handler.FindAll)
 	r.GET("/propagate", handler.Propagate)
 
 	return r.Run(addr)

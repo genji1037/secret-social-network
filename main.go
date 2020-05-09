@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// load config
-	err := config.LoadConfig("../config/server.yml")
+	err := config.LoadConfig("config/server.yml")
 	if err != nil {
 		panic(err)
 	}

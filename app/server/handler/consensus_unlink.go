@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"secret-social-network/app/client"
 	"secret-social-network/app/dgraph"
+	"secret-social-network/app/model"
 	"secret-social-network/app/server/respond"
 	"secret-social-network/app/service"
 	"secret-social-network/app/storage"
@@ -25,23 +26,28 @@ func ConsensusUnlink(c *gin.Context) {
 		return
 	}
 	// query all exists consensus order
-	linkedOrders, err := storage.ConsensusOrder{}.LinkedList(req.AppID, req.OpenID1, req.OpenID2)
+	tx := storage.TxBegin()
+	linkedOrders, err := storage.ConsensusOrder{}.LinkedListForUpdate(tx, req.AppID, req.OpenID1, req.OpenID2)
 	if err != nil {
+		tx.Rollback()
 		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
 		log.Errorf("get linked list failed: %s", err.Error())
 		return
 	}
 
 	// prepare unlinked orderIDs and calculate total value
+	unlinkedIDs := make([]uint, 0, len(linkedOrders))
 	unlinkedOrderIDs := make([]string, 0, len(linkedOrders))
 	unlinkedValue := decimal.Zero
 	for _, linkedOrder := range linkedOrders {
+		unlinkedIDs = append(unlinkedIDs, linkedOrder.ID)
 		unlinkedOrderIDs = append(unlinkedOrderIDs, linkedOrder.OrderID)
 		unlinkedValue = unlinkedValue.Add(*linkedOrder.Value1)
 		unlinkedValue = unlinkedValue.Add(*linkedOrder.Value2)
 	}
 
 	if unlinkedValue.LessThanOrEqual(decimal.Zero) {
+		tx.Rollback()
 		respond.Error(c, http.StatusBadRequest, respond.NoRelation)
 		return
 	}
@@ -49,47 +55,33 @@ func ConsensusUnlink(c *gin.Context) {
 	// get uid from open platform.
 	UID1, UID2, err := client.GetUID(req.AppID, req.OpenID1, req.OpenID2)
 	if err != nil {
+		tx.Rollback()
 		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
 		log.Error("get uid from open platform failed: %s", err.Error())
 		return
 	}
 
-	tx := storage.TxBegin()
 	// mark order unlink
-	err = storage.ConsensusOrder{}.BatchUnlinkTx(tx, unlinkedOrderIDs)
+	err = storage.ConsensusOrder{}.BatchChUnlinkState(tx, unlinkedIDs, model.ConsensusOrderUnlinkStateConfirmed)
 	if err != nil {
+		tx.Rollback()
 		log.WithField("orderIDs", unlinkedOrderIDs).Warnf("batch unlink failed: %s", err.Error())
 		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
-		tx.Rollback()
 		return
 	}
+	tx.Commit()
 
 	// write link log
 	value := unlinkedValue.Neg()
-	linkLog := storage.ConsensusLinkLog{
-		OpenID1: req.OpenID1,
-		OpenID2: req.OpenID2,
-		Action:  storage.ConsensusLinkLogActionUnlink,
-		Value:   &value,
-		AppID:   req.AppID,
-		State:   storage.ConsensusLinkLogStateWait,
-	}
-	if err := linkLog.CreateTx(tx); err != nil {
-		log.WithField("linkLog", linkLog).Warnf("create unlink log failed: %s", err.Error())
-		respond.Error(c, http.StatusInternalServerError, respond.InternalServerError)
-		tx.Rollback()
-		return
-	}
-
-	tx.Commit()
 
 	// rewrite link value at d-graph
 	valueF, _ := value.Float64()
 	err = dgraph.User{}.LinkOrAdd(req.AppID, UID1, UID2, valueF)
+	ok := true
 	if err != nil {
-		service.CommitLog(linkLog, false)
+		ok = false
 	}
-	service.CommitLog(linkLog, true)
+	service.CommitUnlink(unlinkedIDs, ok)
 
 	respond.Success(c, map[string]interface{}{
 		"order_ids": unlinkedOrderIDs,

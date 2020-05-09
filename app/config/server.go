@@ -36,7 +36,12 @@ type MySQL struct {
 }
 
 type OpenPlatform struct {
-	BaseURL   string `yaml:"base_url"`
+	BaseURL string   `yaml:"base_url"`
+	AppKeys []AppKey `yaml:"app_keys"`
+}
+
+type AppKey struct {
+	AppID     string `yaml:"app_id"`
 	SecretKey string `yaml:"secret_key"`
 }
 

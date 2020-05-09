@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 	"secret-social-network/app/config"
@@ -18,7 +19,6 @@ type Table interface {
 
 // 数据库表集合
 var tables = []Table{
-	new(ConsensusLinkLog),
 	new(ConsensusOrder),
 }
 

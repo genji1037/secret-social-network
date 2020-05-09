@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"secret-social-network/app/client"
@@ -40,7 +39,7 @@ func CreateConsensusOrder(appID, openID1, openID2 string, value1, value2 decimal
 		args := client.ApplyPaymentArgs{
 			AppID:   appID,
 			OpenID:  openID1,
-			OrderID: fmt.Sprintf("B%d", orderID),
+			OrderID: "B" + orderID,
 			Token:   cfg.Token,
 			Amount:  value1,
 			Remark:  cfg.PaymentRemark,
@@ -54,15 +53,16 @@ func CreateConsensusOrder(appID, openID1, openID2 string, value1, value2 decimal
 
 	// persist
 	order := storage.ConsensusOrder{
-		OrderID:  orderID,
-		OpenID1:  openID1,
-		OpenID2:  openID2,
-		Value1:   &value1,
-		Value2:   &value2,
-		TradeNo1: tradeNo1,
-		TradeNo2: tradeNo2,
-		AppID:    appID,
-		State:    model.ConsensusOrderStateWait,
+		OrderID:     orderID,
+		OpenID1:     openID1,
+		OpenID2:     openID2,
+		Value1:      &value1,
+		Value2:      &value2,
+		TradeNo1:    tradeNo1,
+		TradeNo2:    tradeNo2,
+		AppID:       appID,
+		LinkState:   model.ConsensusOrderLinkStateWait,
+		UnlinkState: model.ConsensusOrderUnlinkStateNone,
 	}
 	if err := order.Create(); err != nil {
 		return nil, err
@@ -72,10 +72,24 @@ func CreateConsensusOrder(appID, openID1, openID2 string, value1, value2 decimal
 	return &orderResp, nil
 }
 
-func markOrder(order storage.ConsensusOrder, state model.ConsensusOrderState) {
-	// todo add failed reason
-	rowAffected, err := order.ChState(model.ConsensusOrderStateConfirmed, state)
+func CommitLink(order storage.ConsensusOrder, ok bool) {
+	state := model.ConsensusOrderLinkStateDone
+	if !ok {
+		state = model.ConsensusOrderLinkStateFailed
+	}
+	rowAffected, err := order.ChLinkState(model.ConsensusOrderLinkStateConfirmed, state)
 	if err != nil || rowAffected == 0 {
-		log.Errorf("mark order %d [%s] failed", order.OrderID, state)
+		log.Errorf("commit link order %d [%s] failed", order.OrderID, state)
+	}
+}
+
+func CommitUnlink(ids []uint, ok bool) {
+	state := model.ConsensusOrderUnlinkStateDone
+	if !ok {
+		state = model.ConsensusOrderUnlinkStateFailed
+	}
+	err := storage.ConsensusOrder{}.BatchChUnlinkState(nil, ids, state)
+	if err != nil {
+		log.Errorf("commit unlink order %+v [%s] failed", ids, state)
 	}
 }

@@ -1,0 +1,21 @@
+level: debug
+
+mysql:
+  host: 127.0.0.1:3306
+  user: root
+  password: Cyy123456
+  database: otctrade
+  charset: utf8mb4
+  max_idle_conns: 10
+  max_open_conns: 100
+  alway_migrate: true
+
+open:
+  base_url: https://testm.isecret.im
+  app_keys:
+    - app_id: 123142
+      secret_key: 2431234
+      
+consensus:
+  token: TS
+  payment_remark: 建立共识连接

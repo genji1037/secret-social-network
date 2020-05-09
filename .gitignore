@@ -1,0 +1,26 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+.vscode
+
+logs
+vendor
+config/*.yml
+config/*.yaml
+
+*.db
+*.exe
+*.lock
+debug
+
+.idea
+.DS_Store
+
+go.sum
