@@ -16,8 +16,18 @@ func CreateConsensusOrder(appID, openID1, openID2 string, value1, value2 decimal
 	cfg := config.GetServe().Consensus
 	orderID := strconv.Itoa(int(util.Generate()))
 
+	// batch get uid
+	UID1, UID2, err := client.GetUID(appID, openID1, openID2)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"app_id":   appID,
+			"open_id1": openID1,
+			"open_id2": openID2,
+		}).Warnf("get uid by open_id from open platform failed: %s", err.Error())
+		return nil, err
+	}
+
 	// apply trade_no at open platform
-	var err error
 	var tradeNo1, tradeNo2 string
 	if value1.GreaterThan(decimal.Zero) {
 		args := client.ApplyPaymentArgs{
@@ -30,7 +40,7 @@ func CreateConsensusOrder(appID, openID1, openID2 string, value1, value2 decimal
 		}
 		tradeNo1, err = client.ApplyPayment(args)
 		if err != nil {
-			log.WithField("args", args).Errorf("create consensus order1, apply payment failed: %s", err.Error())
+			log.WithField("args", args).Warnf("create consensus order1, apply payment failed: %s", err.Error())
 			return nil, err
 		}
 	}
@@ -54,6 +64,8 @@ func CreateConsensusOrder(appID, openID1, openID2 string, value1, value2 decimal
 	// persist
 	order := storage.ConsensusOrder{
 		OrderID:     orderID,
+		UID1:        UID1,
+		UID2:        UID2,
 		OpenID1:     openID1,
 		OpenID2:     openID2,
 		Value1:      &value1,

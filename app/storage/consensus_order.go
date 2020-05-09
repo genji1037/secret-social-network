@@ -14,15 +14,17 @@ type ConsensusOrder struct {
 	OrderID     string           `gorm:"not null" sql:"index"`
 	OpenID1     string           `gorm:"not null"`
 	OpenID2     string           `gorm:"not null"`
+	UID1        string           `gorm:"not null" sql:"index"`
+	UID2        string           `gorm:"not null" sql:"index"`
 	Value1      *decimal.Decimal `sql:"type:decimal(32,16);not null"`
 	Value2      *decimal.Decimal `sql:"type:decimal(32,16);not null"`
 	AppID       string           `gorm:"not null"`
 	TradeNo1    string
 	TradeNo2    string
 	LinkState   model.ConsensusOrderLinkState `gorm:"not null"`
-	LinkedAt    time.Time
+	LinkedAt    *time.Time
 	UnlinkState model.ConsensusOrderUnlinkState `gorm:"not null"`
-	UnlinkedAt  time.Time
+	UnlinkedAt  *time.Time
 }
 
 func (c *ConsensusOrder) Create() error {
@@ -59,7 +61,7 @@ func (ConsensusOrder) BatchChUnlinkState(tx *gorm.DB, ids []uint, state model.Co
 		db = tx
 	}
 	db = db.Model(new(ConsensusOrder)).
-		Where("id = in (?) and unlink_state = ?", ids)
+		Where("id in (?)", ids)
 
 	if state == model.ConsensusOrderUnlinkStateConfirmed {
 		db = db.Update(map[string]interface{}{
@@ -74,11 +76,11 @@ func (ConsensusOrder) BatchChUnlinkState(tx *gorm.DB, ids []uint, state model.Co
 }
 
 // LinkedList list all confirm and not unlinked orders.
-func (ConsensusOrder) LinkedListForUpdate(tx *gorm.DB, appID string, openID1, openID2 string) ([]ConsensusOrder, error) {
+func (ConsensusOrder) LinkedListForUpdate(tx *gorm.DB, appID, UID1, UID2 string) ([]ConsensusOrder, error) {
 	rs := make([]ConsensusOrder, 0)
 	err := tx.Model(new(ConsensusOrder)).
-		Where("((open_id1 = ? and open_id2 = ?) or (open_id2 = ? and open_id1 = ?)) and link_state <> ? and unlink_state = ?",
-			openID1, openID2, openID2, openID1, model.ConsensusOrderLinkStateWait, model.ConsensusOrderUnlinkStateNone).
+		Where("app_id = ? and ((uid1 = ? and uid2 = ?) or (uid2 = ? and uid1 = ?)) and link_state <> ? and unlink_state = ?",
+			appID, UID1, UID2, UID2, UID1, model.ConsensusOrderLinkStateWait, model.ConsensusOrderUnlinkStateNone).
 		Set("gorm:query_option", "FOR UPDATE").
 		Scan(&rs).Error
 	return rs, err

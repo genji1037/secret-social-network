@@ -4,11 +4,14 @@ mysql:
   host: 127.0.0.1:3306
   user: root
   password: Cyy123456
-  database: otctrade
+  database: ssns
   charset: utf8mb4
   max_idle_conns: 10
   max_open_conns: 100
   alway_migrate: true
+
+dgraph:
+  addr: 127.0.0.1:7080
 
 open:
   base_url: https://testm.isecret.im

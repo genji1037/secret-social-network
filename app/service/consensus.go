@@ -8,7 +8,7 @@ import (
 )
 
 func CreateConsensusRelation(order storage.ConsensusOrder) {
-	// TODO: gracefully shutdown
+	// TODO:⭐⭐ gracefully shutdown
 
 	// link at d-graph
 	value1, value2 := decimal.Zero, decimal.Zero
@@ -20,14 +20,14 @@ func CreateConsensusRelation(order storage.ConsensusOrder) {
 	}
 	value := value1.Add(value2)
 	valueF, _ := value.Float64()
-	err := dgraph.User{}.LinkOrAdd(order.AppID, order.OpenID1, order.OpenID2, valueF)
+	err := dgraph.User{}.LinkOrAdd(order.AppID, order.UID1, order.UID2, valueF)
 	ok := true
 	if err != nil {
 		log.WithFields(log.Fields{
-			"app_id":   order.AppID,
-			"open_id1": order.OpenID1,
-			"open_id2": order.OpenID2,
-			"value":    valueF,
+			"app_id": order.AppID,
+			"uid1":   order.UID1,
+			"uid2":   order.UID2,
+			"value":  valueF,
 		}).Errorf("link or add failed: %s", err.Error())
 		ok = false
 	}

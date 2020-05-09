@@ -10,11 +10,11 @@ import (
 )
 
 type LinkRequest struct {
+	AppID   string          `json:"app_id" binding:"required"`
 	OpenID1 string          `json:"open_id1" binding:"required,uuid"`
 	OpenID2 string          `json:"open_id2" binding:"required,uuid"`
 	Value1  decimal.Decimal `json:"value1" binding:"required,gte=0"`
 	Value2  decimal.Decimal `json:"value2" binding:"required,gte=0"`
-	AppID   string          `json:"app_id" binding:"required"`
 }
 
 func ConsensusLink(c *gin.Context) {

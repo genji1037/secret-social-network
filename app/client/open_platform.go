@@ -43,7 +43,7 @@ func ApplyPayment(args ApplyPaymentArgs) (string, error) {
 	m["pay_type"] = 20
 	m["remark"] = args.Remark
 	m["t"] = time.Now().Unix()
-	m["s"] = generateSignCode(m, cfg.SecretKey)
+	m["s"] = generateSignCode(m, cfg.AppKeys.GetByAppID(args.AppID))
 	url := cfg.BaseURL + "/payment/create"
 
 	rsp, err := post(url, m)
@@ -70,8 +70,9 @@ func GetUID(appID, openID1, openID2 string) (string, string, error) {
 	return UIDs[0], UIDs[1], nil
 }
 
+// BatchGetUID get uid from open platform
 func BatchGetUID(appID string, openID []string) ([]string, error) {
-	// todo
+	// TODO:⭐⭐⭐
 	return openID, nil
 }
 

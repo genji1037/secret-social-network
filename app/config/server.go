@@ -8,6 +8,7 @@ type Serve struct {
 	Port      int          `yaml:"port"`      // 端口号
 	Level     Level        `yaml:"level"`     // 日志级别
 	MySQL     MySQL        `yaml:"mysql"`     // MySQL数据库
+	DGraph    DGraph       `yaml:"dgraph"`    // dgraph数据库
 	Open      OpenPlatform `yaml:"open"`      // 开放平台
 	Consensus Consensus    `yaml:"consensus"` // 共识模块
 }
@@ -35,9 +36,24 @@ type MySQL struct {
 	MaxOpenConns int    `yaml:"max_open_conns"`
 }
 
+type DGraph struct {
+	Addr string `yaml:"addr"`
+}
+
 type OpenPlatform struct {
-	BaseURL string   `yaml:"base_url"`
-	AppKeys []AppKey `yaml:"app_keys"`
+	BaseURL string  `yaml:"base_url"`
+	AppKeys AppKeys `yaml:"app_keys"`
+}
+
+type AppKeys []AppKey
+
+func (a AppKeys) GetByAppID(appID string) string {
+	for i := range a {
+		if a[i].AppID == appID {
+			return a[i].SecretKey
+		}
+	}
+	return ""
 }
 
 type AppKey struct {

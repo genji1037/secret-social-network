@@ -18,7 +18,7 @@ func main() {
 
 	log.StandardLogger().SetLevel(cfg.Level.Value())
 
-	// TODO: init module parallel
+	// TODO:⭐ init module parallel
 	// conn mysql
 	err = storage.Open(storage.Connection{
 		Host:         cfg.MySQL.Host,
@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// conn dGraph
-	if err = dgraph.Open(); err != nil {
+	if err = dgraph.Open(cfg.DGraph); err != nil {
 		log.Panicf("[MAIN] failed to open d-graph: %s", err.Error())
 	}
 
