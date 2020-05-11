@@ -12,6 +12,7 @@ import (
 	"secret-social-network/app/config"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -66,16 +67,58 @@ func GetUID(appID, openID1, openID2 string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	if len(UIDs) < 2 {
-		return "", "", fmt.Errorf("unexpected uids returned by openplatfrom")
+	var uid1, uid2 string
+	for _, uidInfo := range UIDs {
+		if uidInfo.OpenID == openID1 {
+			uid1 = uidInfo.UID
+		}
+		if uidInfo.OpenID == openID2 {
+			uid2 = uidInfo.UID
+		}
 	}
-	return UIDs[0], UIDs[1], nil
+	return uid1, uid2, nil
 }
 
 // BatchGetUID get uid from open platform
-func BatchGetUID(appID string, openID []string) ([]string, error) {
-	// TODO:⭐⭐⭐
-	return openID, nil
+func BatchGetUID(appID string, openID []string) ([]UIDInfo, error) {
+	cfg := config.GetServe().Open
+	url := fmt.Sprintf("%s/manager/user/uid/batch?app_id=%s&open_ids=%s", cfg.BaseURL, appID, strings.Join(openID, ","))
+	rsp, err := get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	jsb, err := json.Marshal(rsp.Data["uids"])
+	if err != nil {
+		return nil, err
+	}
+	var rs []UIDInfo
+	err = json.Unmarshal(jsb, &rs)
+	if err != nil {
+		return nil, err
+	}
+
+	return rs, nil
+}
+
+func get(url string) (rsp *OpenResult, err error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return
+	}
+	client := &http.Client{}
+	client.Timeout = time.Minute
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	rsp = new(OpenResult)
+	body, _ := ioutil.ReadAll(resp.Body)
+	if err = json.Unmarshal(body, rsp); err != nil {
+		return rsp, fmt.Errorf("response: body:%s", string(body))
+	}
+	return
 }
 
 func post(url string, m map[string]interface{}) (rsp *OpenResult, err error) {

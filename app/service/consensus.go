@@ -5,12 +5,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"secret-social-network/app/dgraph"
 	"secret-social-network/app/storage"
+	"sync/atomic"
 )
+
+var InflightConsRelation int64
 
 // CreateConsensusRelation asynchronously create consensus relation at dGraph.
 func CreateConsensusRelation(order storage.ConsensusOrder) {
-	// TODO:⭐⭐ gracefully shutdown
-
+	defer atomic.AddInt64(&InflightConsRelation, -1)
 	// link at d-graph
 	value1, value2 := decimal.Zero, decimal.Zero
 	if order.Value1 != nil {
